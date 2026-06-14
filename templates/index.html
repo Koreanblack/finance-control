@@ -487,7 +487,7 @@
               <td class="amount-cell inc">{{ "$ {:,.0f}".format(item.monto).replace(",", ".") }}</td>
               <td style="text-align:center;">
                 <form action="/eliminar-ingreso" method="POST" onsubmit="return confirm('¿Eliminar este ingreso?');">
-                  <input type="hidden" name="index" value="{{ loop.index0 }}" />
+                  <input type="hidden" name="id" value="{{ item.id }}" />
                   <button type="submit" class="btn-del">Eliminar</button>
                 </form>
               </td>
@@ -525,7 +525,7 @@
               <td class="amount-cell exp">{{ "$ {:,.0f}".format(item.monto).replace(",", ".") }}</td>
               <td style="text-align:center;">
                 <form action="/eliminar-gasto" method="POST" onsubmit="return confirm('¿Eliminar este gasto?');">
-                  <input type="hidden" name="index" value="{{ loop.index0 }}" />
+                  <input type="hidden" name="id" value="{{ item.id }}" />
                   <button type="submit" class="btn-del">Eliminar</button>
                 </form>
               </td>

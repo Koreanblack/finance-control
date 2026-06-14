@@ -1,21 +1,21 @@
 {
   "ingresos": [
-    {"fecha": "2026-06-04", "concepto": "Sueldo", "monto": 30000},
-    {"fecha": "2026-06-11", "concepto": "Venta estéreo - MercadoLibre", "monto": 20000},
-    {"fecha": "2026-06-11", "concepto": "Otro ingreso", "monto": 1800000}
+    {"id": 0, "fecha": "2026-06-04", "concepto": "Sueldo", "monto": 30000},
+    {"id": 1, "fecha": "2026-06-11", "concepto": "Venta estéreo - MercadoLibre", "monto": 20000},
+    {"id": 2, "fecha": "2026-06-11", "concepto": "Otro ingreso", "monto": 1800000}
   ],
   "gastos": [
-    {"fecha": "2026-06-04", "concepto": "Corte de pelo y barba", "monto": 24000, "categoria": "Gasto Fijo Variable"},
-    {"fecha": "2026-06-04", "concepto": "Reparación reloj", "monto": 33000, "categoria": "Placer"},
-    {"fecha": "2026-06-04", "concepto": "Almuerzo con pareja y amiga", "monto": 98000, "categoria": "Placer"},
-    {"fecha": "2026-06-04", "concepto": "Muñecas Barbie colección", "monto": 54000, "categoria": "Placer"},
-    {"fecha": "2026-06-04", "concepto": "Extracción cajero", "monto": 60000, "categoria": "Sin Categorizar"},
-    {"fecha": "2026-06-04", "concepto": "Supermercado DIA", "monto": 53420, "categoria": "Gasto Fijo Variable"},
-    {"fecha": "2026-06-04", "concepto": "Seguro Life", "monto": 25693.65, "categoria": "Gasto Fijo Variable"},
-    {"fecha": "2026-06-05", "concepto": "Supermercado DIA", "monto": 12840, "categoria": "Gasto Fijo Variable"},
-    {"fecha": "2026-06-05", "concepto": "Supermercado DIA", "monto": 5047, "categoria": "Gasto Fijo Variable"},
-    {"fecha": "2026-06-05", "concepto": "Compra con tarjeta", "monto": 4000, "categoria": "Gasto Hormiga"},
-    {"fecha": "2026-06-06", "concepto": "Transferencia", "monto": 7150, "categoria": "Sin Categorizar"},
-    {"fecha": "2026-06-06", "concepto": "Compra en alimentos", "monto": 13500, "categoria": "Gasto Fijo Variable"}
+    {"id": 0, "fecha": "2026-06-04", "concepto": "Corte de pelo y barba", "monto": 24000, "categoria": "Gasto Fijo Variable"},
+    {"id": 1, "fecha": "2026-06-04", "concepto": "Reparación reloj", "monto": 33000, "categoria": "Placer"},
+    {"id": 2, "fecha": "2026-06-04", "concepto": "Almuerzo con pareja y amiga", "monto": 98000, "categoria": "Placer"},
+    {"id": 3, "fecha": "2026-06-04", "concepto": "Muñecas Barbie colección", "monto": 54000, "categoria": "Placer"},
+    {"id": 4, "fecha": "2026-06-04", "concepto": "Extracción cajero", "monto": 60000, "categoria": "Sin Categorizar"},
+    {"id": 5, "fecha": "2026-06-04", "concepto": "Supermercado DIA", "monto": 53420, "categoria": "Gasto Fijo Variable"},
+    {"id": 6, "fecha": "2026-06-04", "concepto": "Seguro Life", "monto": 25693.65, "categoria": "Gasto Fijo Variable"},
+    {"id": 7, "fecha": "2026-06-05", "concepto": "Supermercado DIA", "monto": 12840, "categoria": "Gasto Fijo Variable"},
+    {"id": 8, "fecha": "2026-06-05", "concepto": "Supermercado DIA", "monto": 5047, "categoria": "Gasto Fijo Variable"},
+    {"id": 9, "fecha": "2026-06-05", "concepto": "Compra con tarjeta", "monto": 4000, "categoria": "Gasto Hormiga"},
+    {"id": 10, "fecha": "2026-06-06", "concepto": "Transferencia", "monto": 7150, "categoria": "Sin Categorizar"},
+    {"id": 11, "fecha": "2026-06-06", "concepto": "Compra en alimentos", "monto": 13500, "categoria": "Gasto Fijo Variable"}
   ]
 }
