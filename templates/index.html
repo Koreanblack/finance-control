@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Finanzas Personales</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f2f7;
+      --header-bg: #1a1f36;
+      --header-accent: #4f6ef7;
+      --card-bg: #ffffff;
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --text: #1a1f36;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --income: #10b981;
+      --expense: #ef4444;
+      --neutral: #4f6ef7;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--header-bg);
+      color: #fff;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    header .logo {
+      width: 32px; height: 32px;
+      background: var(--header-accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
+    header .date { margin-left: auto; font-size: 0.8rem; color: #9ca3af; }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* ── Summary cards ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .summary-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .summary-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .summary-card .amount {
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .summary-card.income .amount  { color: var(--income); }
+    .summary-card.expense .amount { color: var(--expense); }
+    .summary-card.balance .amount { color: var(--neutral); }
+    .summary-card.balance.negative .amount { color: var(--expense); }
+    .summary-card .sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Section heading ── */
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Category chart ── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+    }
+    .bar-chart { display: flex; flex-direction: column; gap: 0.65rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.75rem; }
+    .bar-row .cat-label {
+      min-width: 160px;
+      font-size: 0.82rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-track {
+      flex: 1;
+      height: 18px;
+      background: #f3f4f6;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--header-accent);
+      transition: width 0.4s ease;
+    }
+    .bar-row .cat-amount {
+      min-width: 110px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Forms grid ── */
+    .forms-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+    }
+    .form-card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-card h2 .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .form-card.inc h2 .dot { background: var(--income); }
+    .form-card.exp h2 .dot { background: var(--expense); }
+
+    .form-group { margin-bottom: 0.85rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-family: var(--font);
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--header-accent);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      transition: opacity 0.2s;
+      margin-top: 0.25rem;
+    }
+    .btn-submit:hover { opacity: 0.87; }
+    .form-card.inc .btn-submit { background: var(--income); }
+    .form-card.exp .btn-submit { background: var(--expense); }
+
+    /* ── Movements tabs ── */
+    .tabs-wrapper {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 1rem;
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.2s, border-bottom 0.2s;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-btn.active {
+      color: var(--header-accent);
+      border-bottom: 3px solid var(--header-accent);
+    }
+    .tab-panel { display: none; padding: 0; }
+    .tab-panel.active { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+    thead th {
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f9fafb; }
+    tbody td {
+      padding: 0.75rem 1rem;
+      vertical-align: middle;
+    }
+    td.amount-cell {
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+    td.amount-cell.inc { color: var(--income); }
+    td.amount-cell.exp { color: var(--expense); }
+    td.date-cell { color: var(--text-muted); white-space: nowrap; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #ede9fe;
+      color: #6d28d9;
+      white-space: nowrap;
+    }
+    .badge.Placer { background: #fce7f3; color: #be185d; }
+    .badge.GastoFijoVariable { background: #dbeafe; color: #1d4ed8; }
+    .badge.GastoHormiga { background: #fef3c7; color: #92400e; }
+    .badge.SinCategorizar { background: #f3f4f6; color: #6b7280; }
+    .badge.Ahorro { background: #d1fae5; color: #065f46; }
+    .badge.Inversion { background: #ede9fe; color: #5b21b6; }
+
+    .btn-del {
+      background: none;
+      border: 1.5px solid #fca5a5;
+      color: var(--expense);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-del:hover { background: #fee2e2; }
+
+    .empty-state {
+      padding: 2.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .summary-grid { grid-template-columns: 1fr; }
+      .forms-grid   { grid-template-columns: 1fr; }
+      .bar-row .cat-label { min-width: 110px; }
+    }
+    @media (max-width: 480px) {
+      main { padding: 1rem 0.75rem 3rem; }
+      header { padding: 0 1rem; }
+      .summary-card .amount { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">$</div>
+  <h1>Control de Finanzas Personales</h1>
+  <span class="date" id="hdr-date"></span>
+</header>
+
+<main>
+
+  <!-- ── Summary Cards ── -->
+  <section>
+    <p class="section-title">Resumen del período</p>
+    <div class="summary-grid">
+
+      <div class="summary-card income">
+        <span class="label">Total Ingresos</span>
+        <span class="amount">{{ "$ {:,.0f}".format(total_ingresos).replace(",", ".") }}</span>
+        <span class="sub">{{ ingresos|length }} movimiento(s)</span>
+      </div>
+
+      <div class="summary-card expense">
+        <span class="label">Total Gastos</span>
+        <span class="amount">{{ "$ {:,.0f}".format(total_gastos).replace(",", ".") }}</span>
+        <span class="sub">{{ gastos|length }} movimiento(s)</span>
+      </div>
+
+      <div class="summary-card balance {% if balance < 0 %}negative{% endif %}">
+        <span class="label">Balance</span>
+        <span class="amount">{{ "$ {:,.0f}".format(balance).replace(",", ".") }}</span>
+        <span class="sub">{% if balance >= 0 %}Superávit{% else %}Déficit{% endif %}</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Category bar chart ── -->
+  {% if categorias %}
+  <section>
+    <div class="card">
+      <p class="section-title" style="margin-bottom:1rem;">Gastos por categoría</p>
+      {% set max_val = categorias.values()|max %}
+      <div class="bar-chart">
+        {% for cat, monto in categorias|dictsort(by='value', reverse=True) %}
+        <div class="bar-row">
+          <span class="cat-label">{{ cat }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: {{ (monto / max_val * 100)|round(1) }}%;
+              background: {% if cat == 'Placer' %}#ec4899{% elif cat == 'Gasto Fijo Variable' %}#3b82f6{% elif cat == 'Gasto Hormiga' %}#f59e0b{% elif cat == 'Ahorro' %}#10b981{% elif cat == 'Inversión' %}#8b5cf6{% else %}#9ca3af{% endif %};"></div>
+          </div>
+          <span class="cat-amount">{{ "$ {:,.0f}".format(monto).replace(",", ".") }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ── Forms ── -->
+  <section>
+    <p class="section-title">Agregar movimiento</p>
+    <div class="forms-grid">
+
+      <!-- Income form -->
+      <div class="form-card inc">
+        <h2><span class="dot"></span>Agregar Ingreso</h2>
+        <form action="/agregar-ingreso" method="POST">
+          <div class="form-group">
+            <label for="i-fecha">Fecha</label>
+            <input type="date" id="i-fecha" name="fecha" required />
+          </div>
+          <div class="form-group">
+            <label for="i-concepto">Concepto</label>
+            <input type="text" id="i-concepto" name="concepto" placeholder="Ej: Sueldo" required />
+          </div>
+          <div class="form-group">
+            <label for="i-monto">Monto ($)</label>
+            <input type="number" id="i-monto" name="monto" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+          <button type="submit" class="btn-submit">+ Agregar Ingreso</button>
+        </form>
+      </div>
+
+      <!-- Expense form -->
+      <div class="form-card exp">
+        <h2><span class="dot"></span>Agregar Gasto</h2>
+        <form action="/agregar-gasto" method="POST">
+          <div class="form-group">
+            <label for="g-fecha">Fecha</label>
+            <input type="date" id="g-fecha" name="fecha" required />
+          </div>
+          <div class="form-group">
+            <label for="g-concepto">Concepto</label>
+            <input type="text" id="g-concepto" name="concepto" placeholder="Ej: Supermercado" required />
+          </div>
+          <div class="form-group">
+            <label for="g-monto">Monto ($)</label>
+            <input type="number" id="g-monto" name="monto" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label for="g-cat">Categoría</label>
+            <select id="g-cat" name="categoria" required>
+              <option value="Gasto Fijo Variable">Gasto Fijo Variable</option>
+              <option value="Placer">Placer</option>
+              <option value="Gasto Hormiga">Gasto Hormiga</option>
+              <option value="Sin Categorizar">Sin Categorizar</option>
+              <option value="Ahorro">Ahorro</option>
+              <option value="Inversión">Inversión</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-submit">+ Agregar Gasto</button>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Movements table ── -->
+  <section>
+    <p class="section-title">Historial de movimientos</p>
+    <div class="tabs-wrapper">
+
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('ingresos', this)">
+          Ingresos ({{ ingresos|length }})
+        </button>
+        <button class="tab-btn" onclick="switchTab('gastos', this)">
+          Gastos ({{ gastos|length }})
+        </button>
+      </div>
+
+      <!-- Ingresos tab -->
+      <div id="tab-ingresos" class="tab-panel active">
+        {% if ingresos %}
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Concepto</th>
+              <th style="text-align:right;">Monto</th>
+              <th style="text-align:center;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in ingresos %}
+            <tr>
+              <td style="color:var(--text-muted); font-size:0.75rem;">{{ loop.index }}</td>
+              <td class="date-cell">{{ item.fecha }}</td>
+              <td>{{ item.concepto }}</td>
+              <td class="amount-cell inc">{{ "$ {:,.0f}".format(item.monto).replace(",", ".") }}</td>
+              <td style="text-align:center;">
+                <form action="/eliminar-ingreso" method="POST" onsubmit="return confirm('¿Eliminar este ingreso?');">
+                  <input type="hidden" name="index" value="{{ loop.index0 }}" />
+                  <button type="submit" class="btn-del">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No hay ingresos registrados.</div>
+        {% endif %}
+      </div>
+
+      <!-- Gastos tab -->
+      <div id="tab-gastos" class="tab-panel">
+        {% if gastos %}
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Concepto</th>
+              <th>Categoría</th>
+              <th style="text-align:right;">Monto</th>
+              <th style="text-align:center;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in gastos %}
+            {% set cat_class = item.categoria | replace(" ", "") %}
+            <tr>
+              <td style="color:var(--text-muted); font-size:0.75rem;">{{ loop.index }}</td>
+              <td class="date-cell">{{ item.fecha }}</td>
+              <td>{{ item.concepto }}</td>
+              <td><span class="badge {{ cat_class }}">{{ item.categoria }}</span></td>
+              <td class="amount-cell exp">{{ "$ {:,.0f}".format(item.monto).replace(",", ".") }}</td>
+              <td style="text-align:center;">
+                <form action="/eliminar-gasto" method="POST" onsubmit="return confirm('¿Eliminar este gasto?');">
+                  <input type="hidden" name="index" value="{{ loop.index0 }}" />
+                  <button type="submit" class="btn-del">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No hay gastos registrados.</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Set today's date on date inputs
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('i-fecha').value = today;
+  document.getElementById('g-fecha').value = today;
+
+  // Header date
+  document.getElementById('hdr-date').textContent = new Date().toLocaleDateString('es-AR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  // Tab switching
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
