@@ -1,0 +1,161 @@
+/* FinanzasPersonales — Custom Styles */
+
+:root {
+  --fc-purple: #7c3aed;
+  --fc-orange: #ea580c;
+  --fc-green: #16a34a;
+  --fc-red: #dc2626;
+}
+
+body {
+  background-color: #f8f9fb;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+/* Footer */
+.footer-bar {
+  border-top: 1px solid #e9ecef;
+  background: #fff;
+  color: #adb5bd;
+}
+
+/* Total Balance Card */
+.total-balance-card {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  border-radius: 16px !important;
+}
+.total-balance-card .card-body {
+  color: #fff;
+}
+.total-balance-card .text-muted {
+  color: rgba(255,255,255,0.75) !important;
+}
+.total-balance-card h1 {
+  color: #fff !important;
+}
+
+/* Wallet cards */
+.wallet-card {
+  border-radius: 14px !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.wallet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+}
+
+.wallet-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.06);
+  color: #495057;
+}
+
+.wallet-macro   { border-top: 3px solid #f59e0b; }
+.wallet-personal{ border-top: 3px solid #8b5cf6; }
+.wallet-ciudad  { border-top: 3px solid #0ea5e9; }
+.wallet-mp      { border-top: 3px solid #22c55e; }
+
+/* Purple & Orange badge helpers (Bootstrap doesn't have these) */
+.bg-purple {
+  background-color: var(--fc-purple) !important;
+  color: #fff !important;
+}
+.bg-orange {
+  background-color: var(--fc-orange) !important;
+  color: #fff !important;
+}
+
+/* Category badge polish */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.32em 0.65em;
+  border-radius: 6px;
+}
+
+/* Tables */
+.table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: #6c757d;
+  border-bottom-width: 1px;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f0f4ff;
+}
+
+/* Cards */
+.card {
+  border-radius: 12px !important;
+}
+
+/* Progress bars thin */
+.progress {
+  border-radius: 99px;
+  background-color: #e9ecef;
+}
+.progress-bar {
+  border-radius: 99px;
+}
+
+/* Form controls */
+.form-control:focus,
+.form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.18);
+}
+
+/* Letter spacing utility */
+.letter-spacing {
+  letter-spacing: 0.08em;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+.btn-group .btn:first-child { border-radius: 8px 0 0 8px; }
+.btn-group .btn:last-child  { border-radius: 0 8px 8px 0; }
+
+/* Active type btn highlight */
+.btn-check:checked + .btn-outline-success {
+  background-color: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+}
+.btn-check:checked + .btn-outline-danger {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+.btn-check:checked + .btn-outline-info {
+  background-color: #0891b2;
+  border-color: #0891b2;
+  color: #fff;
+}
+
+/* Mobile tweaks */
+@media (max-width: 576px) {
+  h2 { font-size: 1.4rem; }
+  .display-5 { font-size: 2rem; }
+  .total-balance-card .card-body { padding: 1.5rem 1rem; }
+}
