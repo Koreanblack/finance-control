@@ -7,8 +7,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, g
 app = Flask(__name__)
 app.secret_key = 'finance-control-secret-2026'
 
-DATABASE = os.path.join(os.path.dirname(__file__), 'finance.db')
-DATA_JSON = os.path.join(os.path.dirname(__file__), 'data.json')
+_base_dir = os.path.dirname(__file__)
+# Vercel's filesystem is read-only except /tmp
+DATABASE = '/tmp/finance.db' if os.environ.get('VERCEL') else os.path.join(_base_dir, 'finance.db')
+DATA_JSON = os.path.join(_base_dir, 'data.json')
 
 WALLETS = [
     'Banco Macro',
