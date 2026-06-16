@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Control de Finanzas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-0 fw-bold"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h2>
+    <p class="text-muted mb-0 small">{{ today.strftime('%d de %B de %Y') }}</p>
+  </div>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>Nueva Transacción
+  </a>
+</div>
+
+<!-- Total Balance -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm total-balance-card">
+      <div class="card-body text-center py-4">
+        <p class="text-muted mb-1 small text-uppercase fw-semibold letter-spacing">Balance Total</p>
+        <h1 class="display-5 fw-bold {% if total_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {{ total_balance | ars }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Wallet Cards -->
+<h5 class="fw-semibold mb-3 text-secondary"><i class="bi bi-wallet me-2"></i>Billeteras</h5>
+<div class="row g-3 mb-5">
+  {% set wallet_icons = {
+    'Banco Macro': 'bi-bank',
+    'Personal Pay': 'bi-phone',
+    'Banco Ciudad': 'bi-building',
+    'MercadoPago': 'bi-bag'
+  } %}
+  {% set wallet_colors = {
+    'Banco Macro': 'wallet-macro',
+    'Personal Pay': 'wallet-personal',
+    'Banco Ciudad': 'wallet-ciudad',
+    'MercadoPago': 'wallet-mp'
+  } %}
+  {% for wallet in wallets %}
+  {% set balance = balances.get(wallet, 0) %}
+  <div class="col-sm-6 col-lg-3">
+    <div class="card border-0 shadow-sm h-100 wallet-card {{ wallet_colors.get(wallet, '') }}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <p class="card-subtitle text-muted small mb-1">{{ wallet }}</p>
+          </div>
+          <div class="wallet-icon">
+            <i class="bi {{ wallet_icons.get(wallet, 'bi-wallet') }} fs-4"></i>
+          </div>
+        </div>
+        <h4 class="fw-bold mb-0 {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {{ balance | ars }}
+        </h4>
+      </div>
+      <div class="card-footer bg-transparent border-0 pb-3">
+        <a href="{{ url_for('transactions', wallet=wallet) }}" class="btn btn-sm btn-outline-secondary w-100">
+          Ver movimientos
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Expenses by Category (current month) -->
+{% if cat_rows %}
+<div class="row mb-5">
+  <div class="col-lg-5 mb-4 mb-lg-0">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-bold text-secondary mb-0">
+          <i class="bi bi-pie-chart me-2"></i>Gastos por Categoría (mes actual)
+        </h6>
+      </div>
+      <div class="card-body">
+        {% set total_cat = namespace(val=0) %}
+        {% for row in cat_rows %}{% set total_cat.val = total_cat.val + row['total'] %}{% endfor %}
+        {% for row in cat_rows %}
+        {% set pct = ((row['total'] / total_cat.val) * 100) | round(1) if total_cat.val > 0 else 0 %}
+        {% set cat_name = row['category'] or 'Sin determinar' %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small">
+              <span class="badge {{ cat_badge(cat_name) }} me-1">{{ cat_name }}</span>
+            </span>
+            <span class="small text-muted fw-semibold">{{ row['total'] | ars }} <span class="text-muted">({{ pct }}%)</span></span>
+          </div>
+          <div class="progress" style="height: 6px;">
+            <div class="progress-bar {{ cat_bar(cat_name) }}" style="width: {{ pct }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+        <div class="border-top pt-2 mt-2 d-flex justify-content-between">
+          <span class="small fw-semibold text-secondary">Total gastos</span>
+          <span class="small fw-bold text-danger">{{ total_cat.val | ars }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent transactions -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-secondary mb-0">
+          <i class="bi bi-clock-history me-2"></i>Últimas Transacciones
+        </h6>
+        <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3 small">Fecha</th>
+                <th class="small">Descripción</th>
+                <th class="small">Billetera</th>
+                <th class="small text-end pe-3">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in recent %}
+              <tr>
+                <td class="ps-3 small text-muted">{{ t['date'] }}</td>
+                <td>
+                  <span class="small fw-semibold d-block">{{ t['description'] }}</span>
+                  {% if t['type'] == 'egreso' and t['category'] %}
+                    <span class="badge {{ cat_badge(t['category']) }} small">{{ t['category'] }}</span>
+                  {% elif t['type'] == 'transferencia' %}
+                    <span class="badge bg-info-subtle text-info small">
+                      <i class="bi bi-arrow-left-right me-1"></i>{{ t['wallet'] }} → {{ t['wallet_destination'] }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">{{ t['wallet'] }}</td>
+                <td class="text-end pe-3 fw-bold small
+                  {% if t['type'] == 'ingreso' %}text-success
+                  {% elif t['type'] == 'egreso' %}text-danger
+                  {% else %}text-info{% endif %}">
+                  {% if t['type'] == 'egreso' %}-{% elif t['type'] == 'ingreso' %}+{% endif %}{{ t['amount'] | ars }}
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not recent %}
+              <tr><td colspan="4" class="text-center text-muted py-4">Sin transacciones.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<!-- Recent transactions full width if no category data -->
+<div class="row mb-5">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-secondary mb-0">
+          <i class="bi bi-clock-history me-2"></i>Últimas Transacciones
+        </h6>
+        <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3 small">Fecha</th>
+                <th class="small">Descripción</th>
+                <th class="small">Billetera</th>
+                <th class="small text-end pe-3">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in recent %}
+              <tr>
+                <td class="ps-3 small text-muted">{{ t['date'] }}</td>
+                <td>
+                  <span class="small fw-semibold d-block">{{ t['description'] }}</span>
+                  {% if t['type'] == 'egreso' and t['category'] %}
+                    <span class="badge {{ cat_badge(t['category']) }} small">{{ t['category'] }}</span>
+                  {% elif t['type'] == 'transferencia' %}
+                    <span class="badge bg-info-subtle text-info small">
+                      <i class="bi bi-arrow-left-right me-1"></i>{{ t['wallet'] }} → {{ t['wallet_destination'] }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">{{ t['wallet'] }}</td>
+                <td class="text-end pe-3 fw-bold small
+                  {% if t['type'] == 'ingreso' %}text-success
+                  {% elif t['type'] == 'egreso' %}text-danger
+                  {% else %}text-info{% endif %}">
+                  {% if t['type'] == 'egreso' %}-{% elif t['type'] == 'ingreso' %}+{% endif %}{{ t['amount'] | ars }}
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not recent %}
+              <tr><td colspan="4" class="text-center text-muted py-4">Sin transacciones aún. <a href="{{ url_for('add_transaction') }}">Agregar una</a></td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

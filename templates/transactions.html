@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}Transacciones — Control de Finanzas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0"><i class="bi bi-list-ul me-2 text-primary"></i>Transacciones</h2>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>Nueva
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="get" action="{{ url_for('transactions') }}" id="filterForm">
+      <div class="row g-3 align-items-end">
+        <div class="col-sm-6 col-lg-3">
+          <label class="form-label small fw-semibold text-secondary">Billetera</label>
+          <select name="wallet" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todas las billeteras</option>
+            {% for w in wallets %}
+            <option value="{{ w }}" {% if wallet_filter == w %}selected{% endif %}>{{ w }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label small fw-semibold text-secondary">Tipo</label>
+          <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            <option value="ingreso" {% if type_filter == 'ingreso' %}selected{% endif %}>Ingreso</option>
+            <option value="egreso" {% if type_filter == 'egreso' %}selected{% endif %}>Egreso</option>
+            <option value="transferencia" {% if type_filter == 'transferencia' %}selected{% endif %}>Transferencia</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <label class="form-label small fw-semibold text-secondary">Categoría</label>
+          <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todas las categorías</option>
+            {% for c in categories %}
+            <option value="{{ c }}" {% if category_filter == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label small fw-semibold text-secondary">Desde</label>
+          <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" onchange="this.form.submit()" />
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label small fw-semibold text-secondary">Hasta</label>
+          <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" onchange="this.form.submit()" />
+        </div>
+      </div>
+
+      <!-- Active filter chips -->
+      {% if wallet_filter or type_filter or category_filter or date_from or date_to %}
+      <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="small text-muted me-1">Filtros activos:</span>
+        {% if wallet_filter %}
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+            <i class="bi bi-wallet me-1"></i>{{ wallet_filter }}
+            <a href="{{ url_for('transactions', type=type_filter, category=category_filter, date_from=date_from, date_to=date_to) }}" class="text-primary ms-1 text-decoration-none">&times;</a>
+          </span>
+        {% endif %}
+        {% if type_filter %}
+          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+            {{ type_filter | capitalize }}
+            <a href="{{ url_for('transactions', wallet=wallet_filter, category=category_filter, date_from=date_from, date_to=date_to) }}" class="text-secondary ms-1 text-decoration-none">&times;</a>
+          </span>
+        {% endif %}
+        {% if category_filter %}
+          <span class="badge {{ cat_badge(category_filter) }}">
+            {{ category_filter }}
+            <a href="{{ url_for('transactions', wallet=wallet_filter, type=type_filter, date_from=date_from, date_to=date_to) }}" class="ms-1 text-decoration-none text-inherit">&times;</a>
+          </span>
+        {% endif %}
+        {% if date_from %}
+          <span class="badge bg-light text-dark border">Desde {{ date_from }}</span>
+        {% endif %}
+        {% if date_to %}
+          <span class="badge bg-light text-dark border">Hasta {{ date_to }}</span>
+        {% endif %}
+        <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-outline-secondary ms-1">
+          <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+        </a>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Wallet filter chips shortcut -->
+<div class="mb-3 d-flex flex-wrap gap-2">
+  <a href="{{ url_for('transactions') }}" class="btn btn-sm {% if not wallet_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">
+    Todas
+  </a>
+  {% for w in wallets %}
+  <a href="{{ url_for('transactions', wallet=w, type=type_filter, category=category_filter, date_from=date_from, date_to=date_to) }}"
+     class="btn btn-sm {% if wallet_filter == w %}btn-primary{% else %}btn-outline-primary{% endif %}">
+    {{ w }}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Results count -->
+<p class="small text-muted mb-2">
+  {{ transactions | length }} transacción{% if transactions | length != 1 %}es{% endif %} encontrada{% if transactions | length != 1 %}s{% endif %}
+</p>
+
+<!-- Transactions table -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3 small">Fecha</th>
+            <th class="small">Descripción</th>
+            <th class="small">Tipo</th>
+            <th class="small">Categoría</th>
+            <th class="small">Billetera</th>
+            <th class="small text-end">Monto</th>
+            <th class="small text-center pe-3">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+          <tr>
+            <td class="ps-3 small text-muted text-nowrap">{{ t['date'] }}</td>
+            <td>
+              <span class="small fw-semibold">{{ t['description'] }}</span>
+              {% if t['notes'] %}
+                <span class="d-block text-muted small">{{ t['notes'] }}</span>
+              {% endif %}
+              {% if t['type'] == 'transferencia' and t['wallet_destination'] %}
+                <span class="d-block small text-info">
+                  <i class="bi bi-arrow-right me-1"></i>{{ t['wallet_destination'] }}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if t['type'] == 'ingreso' %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-arrow-down-circle me-1"></i>Ingreso
+                </span>
+              {% elif t['type'] == 'egreso' %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                  <i class="bi bi-arrow-up-circle me-1"></i>Egreso
+                </span>
+              {% else %}
+                <span class="badge bg-info-subtle text-info border border-info-subtle">
+                  <i class="bi bi-arrow-left-right me-1"></i>Transferencia
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if t['category'] %}
+                <span class="badge {{ cat_badge(t['category']) }}">{{ t['category'] }}</span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ t['wallet'] }}</td>
+            <td class="text-end fw-bold small text-nowrap
+              {% if t['type'] == 'ingreso' %}text-success
+              {% elif t['type'] == 'egreso' %}text-danger
+              {% else %}text-info{% endif %}">
+              {% if t['type'] == 'egreso' %}-{% elif t['type'] == 'ingreso' %}+{% endif %}{{ t['amount'] | ars }}
+            </td>
+            <td class="text-center pe-3">
+              <a href="{{ url_for('edit_transaction', txn_id=t['id']) }}" class="btn btn-sm btn-outline-secondary me-1" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form method="post" action="{{ url_for('delete_transaction', txn_id=t['id']) }}" class="d-inline"
+                    onsubmit="return confirm('¿Eliminar esta transacción?')">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not transactions %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+              Sin transacciones con los filtros actuales.
+              <br><a href="{{ url_for('transactions') }}">Limpiar filtros</a> o
+              <a href="{{ url_for('add_transaction') }}">agregar una transacción</a>.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
